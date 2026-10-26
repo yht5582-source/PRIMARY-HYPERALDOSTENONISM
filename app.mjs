@@ -15,9 +15,9 @@ $('screen-form').addEventListener('reset',()=>{clearResult();$('subtype').value=
 $('screen-form').addEventListener('input',()=>{if(submitted)clearResult();});
 $('screen-form').addEventListener('change',()=>{if(submitted)clearResult();});
 const tests={
- saline:'<h3>坐姿生理食鹽水抑制試驗</h3><p>由醫療團隊依標準流程執行：0.9% saline 2 L／4 小時，測試前後 PAC 與 K。先校正低血鉀。</p><p>4 小時 PAC &lt;7.8 ng/dL（免疫分析法）或 &lt;5.8 ng/dL（LC-MS/MS）使 PA 可能性降低；不能僅以單一界值排除高度懷疑者。臥姿流程不可直接套用坐姿閾值。</p><div class="note warning">未控制血壓、心衰竭／肺水腫風險、晚期 CKD 不宜常規執行。eGFR &lt;30 是本工具採用的保守警示值，不是指引統一絕對界值。</div>',
- captopril:'<h3>Captopril challenge</h3><p>常見流程：坐姿休息後給 captopril 50 mg，於基線與 2 小時測 PAC／renin；依執行中心流程調整。</p><p>2 小時 renin 仍受抑制時，PAC &lt;10 ng/dL（免疫分析法）或 &lt;7.5 ng/dL（LC-MS/MS）使 PA 較不可能。不是單看 PAC 下降百分比。</p><div class="note warning">不需大量補液，但仍須注意低血壓、AKI、高血鉀、腎動脈狹窄及懷孕禁忌。既有 ACEI／ARB 會影響試驗解讀。</div>',
- oral:'<h3>口服鹽負荷試驗</h3><p>依中心流程短期增加鈉攝取，於末段收集 24 小時尿 aldosterone、尿鈉與 creatinine，確認鈉負荷與收集完整性。</p><p>尿 aldosterone 結果受檢驗法、腎功能及收集品質影響，本工具不以單一尿液數值自動確診。</p><div class="note warning">嚴重未控制高血壓、腎功能不全、心衰竭、心律不整或嚴重低血鉀者不宜；不可自行在家加鹽測試。</div>',
+ saline:'<h3>坐姿生理食鹽水抑制試驗</h3><p>由醫療團隊依標準流程執行：0.9% saline 2 L／4 小時，測試前後 PAC 與 K。測試前先將血鉀矯正至正常。</p><p>4 小時 PAC &lt;7.8 ng/dL（免疫分析法）或 &lt;5.8 ng/dL（LC-MS/MS）使 PA 可能性降低；不能僅以單一界值排除高度懷疑者。臥姿流程不可直接套用坐姿閾值。</p><div class="note warning">未控制血壓、心衰竭／肺水腫風險、晚期 CKD 不宜常規執行。eGFR &lt;30 是本工具採用的保守警示值，不是指引統一絕對界值。</div>',
+ captopril:'<h3>Captopril challenge</h3><p>指引表 8 流程：坐姿 1 小時後抽基線血，給 captopril 50 mg，持續坐姿 2 小時後再抽血；兩個時間點都測 PAC 與 renin。</p><p>2 小時 renin 仍受抑制（PRA &lt;1.0 ng/mL/hr 或 DRC &lt;10 mU/L）時，PAC &lt;10 ng/dL（免疫分析法）或 &lt;7.5 ng/dL（LC-MS/MS）使 PA 較不可能。不是單看 PAC 下降百分比。</p><div class="note warning">不需大量補液，但仍須注意低血壓、AKI、高血鉀、腎動脈狹窄及懷孕禁忌。既有 ACEI／ARB 會影響試驗解讀。</div>',
+ oral:'<h3>口服鹽負荷試驗</h3><p>指引表 8 流程：每日攝取鈉 4–5 g，共 3–4 天；最後一天收集 24 小時尿，測 aldosterone、鈉與 creatinine。先將血鉀矯正至正常（低血鉀可致偽陰性）。</p><p>24 小時尿鈉理想上 &gt;200 mEq，並以尿 creatinine 確認收集完整。此時 24 小時尿 aldosterone &lt;10 μg 使 PA 可能性降低；指引未另列 LC-MS/MS 界值，結果為機率判讀，非單一數值確診。</p><div class="note warning">嚴重未控制高血壓、腎功能不全、心衰竭、心律不整或嚴重低血鉀者不宜；不可自行在家加鹽測試。</div>',
  fludro:'<h3>Fludrocortisone suppression test</h3><p>多日給藥搭配鈉負荷與補鉀，需密切監測血壓、血鉀及相關荷爾蒙，適合有經驗的專科中心。</p><p>因流程繁複與安全監測需求，本頁不提供自行執行劑量；依中心驗證程序判讀。</p>'};
 function refresh(){
  $('test-detail').innerHTML=tests[$('test').value];
