@@ -10,7 +10,10 @@ export function assess(x) {
   const ms=x.assay==='ms', drc=x.reninType==='drc';
   const ratio=drc?pac*27.7/r:pac/r;
   const cutoff=drc?(ms?52:70):(ms?15:20), pacCut=ms?7.5:10;
-  const lowR=r<=(drc?8.2:1), highA=pac>=pacCut, highRatio=ratio>cutoff;
+  const rCut=drc?8.2:1, strongR=drc?2:0.2;
+  // Below the quantitation limit the true renin is lower than the entered limit, so it is only "suppressed" if the limit itself is at or under the cutoff.
+  const lowR=r<=rCut, highA=pac>=pacCut, highRatio=ratio>cutoff;
+  const reninUndetermined=!!x.below&&!lowR;
   const positive=lowR&&highA&&highRatio;
   const meds=x.meds||[], beta=meds.includes('beta')||meds.includes('central');
   const raising=meds.some(m=>['raas','mra','diuretic','sglt2'].includes(m));
@@ -24,8 +27,9 @@ export function assess(x) {
   if(ckd)warnings.push('CKD 可能增加篩檢偽陽性；結合腎功能、藥物與臨床表現判讀，MRA 需加密血鉀監測。');
   if(x.prepared!=='yes')warnings.push('採血條件未確認：早晨坐姿、抽血前數天避免刻意限鹽，並先矯正低血鉀。');
   if(x.below)warnings.push('Renin 低於定量下限：目前 ARR 僅為下界估算，不是精確值；勿將 0 當分母，請與實驗室確認。');
+  if(reninUndetermined)warnings.push('Renin 定量下限高於篩檢界值（'+(drc?'DRC 8.2 mU/L':'PRA 1 ng/mL/hr')+'），無法判定 renin 是否受抑制；請改用較靈敏的檢驗或與實驗室確認後再判讀。');
   if(x.pregnancy)warnings.push('懷孕／備孕需專科個別評估；本工具不提供此情境的常規抑制試驗或 MRA 處方路徑。');
-  const strong=(x.resistant||lowK)&&r<(drc?2:0.2)&&pac>(ms?15:20)&&!x.below;
+  const strong=(x.resistant||lowK)&&(x.below?r<=strongR:r<strongR)&&pac>(ms?15:20);
   const blocked=x.pregnancy||+x.k<2.5||+x.k>=6;
   let title, next;
   if(blocked){title='先處理特殊／高風險情境';next='先完成專科或即時臨床評估，再安排 PA 診斷流程。';}
@@ -35,7 +39,8 @@ export function assess(x) {
     if(x.surgery==='no')next+=' 不願／不適合手術者，可由醫師依篩檢結果考慮 MRA，通常不需先做抑制試驗或 AVS。';
     else if(x.surgery==='yes')next+=strong?' 數值符合典型可免抑制試驗條件；排除干擾後，由專科評估腎上腺 CT＋AVS 定側。':' 願意且適合手術：通常先評估 aldosterone 抑制試驗；若支持 PA，再以 CT＋AVS 定側。';
     else next+=' 先討論手術意願及適合性，再決定抑制試驗／AVS 或藥物治療。';
-  }else{title=(lowR||x.highRisk||lowK||raising||x.prepared!=='yes')?'未達完整陽性條件，仍需複評':'本次未達參考篩檢陽性條件';next=(lowR||x.highRisk||lowK||raising||x.prepared!=='yes')?'矯正低血鉀、檢視用藥與採血條件，另日重測；高懷疑度不可因單次陰性排除。':'若臨床懷疑度低，可持續高血壓照護；日後出現抗藥性高血壓、低血鉀或其他疑點時重篩。';}
-  return {errors:[],pac,ratio,cutoff,pacCut,lowR,highA,highRatio,positive,strong,title,next,warnings,lowK,blocked,drc};
+  }else if(reninUndetermined){title='Renin 無法判定，暫不能判讀';next='Renin 低於定量下限但下限高於界值，結果無法歸類為陽性或陰性；請以較靈敏的 renin 檢驗另日重測。';
+  }else{const recheck=lowR||x.highRisk||x.resistant||lowK||raising||x.prepared!=='yes';title=recheck?'未達完整陽性條件，仍需複評':'本次未達參考篩檢陽性條件';next=recheck?'矯正低血鉀、檢視用藥與採血條件，另日重測；高懷疑度不可因單次陰性排除。':'若臨床懷疑度低，可持續高血壓照護；日後出現抗藥性高血壓、低血鉀或其他疑點時重篩。';}
+  return {errors:[],pac,ratio,reninUndetermined,cutoff,pacCut,lowR,highA,highRatio,positive,strong,title,next,warnings,lowK,blocked,drc};
 }
 export function salineRisk(x){return +x.egfr<30||x.hf||x.uncontrolled||+x.k<3.5;}

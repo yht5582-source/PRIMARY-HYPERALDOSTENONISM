@@ -16,4 +16,4 @@ GitHub Pages: main branch / root。檔案使用相對路徑，適用儲存庫子
 ## 驗證
 `node engine.test.mjs`
 
-版本 1.0，內容整理日期 2026-10-26。
+版本 1.1，內容整理日期 2026-10-26。
