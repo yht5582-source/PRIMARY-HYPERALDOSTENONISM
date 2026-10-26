@@ -1,0 +1,27 @@
+import assert from 'node:assert/strict';
+import {assess,salineRisk} from './engine.mjs';
+const base={pac:25,unit:'ng',renin:0.5,reninType:'pra',assay:'ia',k:4,egfr:90,prepared:'yes',surgery:'yes',meds:[]};
+const t=(o)=>assess({...base,...o});
+assert.equal(t({}).ratio,50);assert.equal(t({}).positive,true);
+assert.equal(t({pac:250,unit:'pg'}).ratio,50);
+assert.ok(Math.abs(t({pac:692.5,unit:'pmol'}).ratio-50)<1e-10);
+assert.equal(t({pac:10,renin:0.5}).positive,false); // ARR exactly 20 is not >20
+assert.equal(t({pac:10,renin:0.49}).positive,true);
+assert.equal(t({pac:9.9,renin:0.1}).positive,false);
+assert.equal(t({pac:7.5,renin:0.49,assay:'ms'}).positive,true);
+assert.equal(t({pac:7.5,renin:0.5,assay:'ms'}).positive,false);
+assert.equal(t({pac:30,renin:8.2,reninType:'drc'}).positive,true);
+assert.equal(t({pac:30,renin:8.3,reninType:'drc'}).positive,false);
+assert.equal(t({pac:35,renin:0.1,k:3,resistant:true}).strong,true);
+assert.equal(t({pac:35,renin:0.2,k:3}).strong,false);
+assert.equal(t({pac:35,renin:0.1,k:3,below:true}).strong,false);
+assert.ok(t({pac:12,renin:0.2,meds:['beta']}).warnings.some(s=>s.includes('偽陽性')));
+assert.ok(t({pac:5,meds:['raas']}).next.includes('重測'));
+assert.ok(t({k:3}).warnings.some(s=>s.includes('陰性不能排除')));
+assert.equal(t({k:6}).blocked,true);assert.equal(t({pregnancy:true}).blocked,true);
+assert.ok(t({surgery:'no'}).next.includes('通常不需'));
+assert.ok(t({egfr:24}).warnings.some(s=>s.includes('CKD')));
+for(const bad of ['',0,-1,'abc',Infinity])assert.ok(t({renin:bad}).errors.length);
+assert.ok(t({k:11}).errors.length);
+assert.equal(salineRisk({...base,egfr:24}),true);assert.equal(salineRisk({...base,hf:true}),true);assert.equal(salineRisk({...base,k:3}),true);assert.equal(salineRisk(base),false);
+console.log('PASS: 32 assertions — units, assay cutoffs, boundary values, invalid inputs, interference, high-risk routing.');
